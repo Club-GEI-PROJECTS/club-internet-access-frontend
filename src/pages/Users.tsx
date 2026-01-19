@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { usersService } from '../services/api'
-import { Plus, Trash2, Shield, User as UserIcon } from 'lucide-react'
+import { Plus, Shield, User as UserIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 

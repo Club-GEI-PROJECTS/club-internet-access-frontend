@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authService } from '../services/api'
 import toast from 'react-hot-toast'
-import { Wifi, Mail, ArrowLeft } from 'lucide-react'
+import { Mail, ArrowLeft } from 'lucide-react'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')

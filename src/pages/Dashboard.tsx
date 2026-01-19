@@ -2,16 +2,12 @@ import { useEffect, useState } from 'react'
 import { dashboardService } from '../services/api'
 import { 
   Wifi, 
-  CreditCard, 
   Activity, 
-  Users, 
   TrendingUp,
   DollarSign,
   AlertCircle
 } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
 interface Stats {

@@ -2,19 +2,6 @@ import { useEffect, useState } from 'react'
 import { sessionsService, mikrotikService } from '../services/api'
 import { RefreshCw, Wifi, Activity, Download, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { format } from 'date-fns'
-
-interface Session {
-  id: string
-  wifiAccount: {
-    username: string
-  } | null
-  ipAddress: string | null
-  bytesIn: number
-  bytesOut: number
-  connectedAt: string | null
-  isActive: boolean
-}
 
 interface ActiveUser {
   id: string
@@ -26,7 +13,6 @@ interface ActiveUser {
 }
 
 export default function Sessions() {
-  const [sessions, setSessions] = useState<Session[]>([])
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
   const [statistics, setStatistics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -40,12 +26,11 @@ export default function Sessions() {
 
   const loadData = async () => {
     try {
-      const [sessionsData, activeData, statsData] = await Promise.all([
+      const [, activeData, statsData] = await Promise.all([
         sessionsService.getActive(),
         mikrotikService.getActiveUsers(),
         sessionsService.getStatistics(),
       ])
-      setSessions(sessionsData)
       setActiveUsers(activeData)
       setStatistics(statsData)
     } catch (error: any) {

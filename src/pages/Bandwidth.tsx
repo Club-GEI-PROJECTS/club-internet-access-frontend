@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { bandwidthService } from '../services/api'
-import { Activity, Download, Upload, Users, TrendingUp, RefreshCw } from 'lucide-react'
+import { Activity, Download, Upload, Users, RefreshCw } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 

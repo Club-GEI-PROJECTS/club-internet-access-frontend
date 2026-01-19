@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { authService } from '../services/api'
 import toast from 'react-hot-toast'
 import { Wifi } from 'lucide-react'
 

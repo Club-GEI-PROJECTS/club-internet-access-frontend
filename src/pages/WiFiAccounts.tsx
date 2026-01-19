@@ -45,7 +45,7 @@ export default function WiFiAccounts() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const newAccount = await wifiAccountsService.create(formData)
+      await wifiAccountsService.create(formData)
       toast.success('Compte Wi-Fi créé avec succès!')
       setShowCreateModal(false)
       setFormData({ duration: '24h', bandwidthProfile: '2mbps', maxDevices: 1, comment: '' })

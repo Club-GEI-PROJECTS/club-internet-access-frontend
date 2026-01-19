@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { authService } from '../services/api'
 import toast from 'react-hot-toast'
-import { Wifi, Lock, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Lock, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams()
