@@ -22,7 +22,7 @@ export default function ResetPassword() {
       toast.error('Token de réinitialisation manquant')
       router.push('/forgot-password')
     }
-  }, [token, navigate])
+  }, [token, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
