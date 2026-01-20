@@ -5,17 +5,7 @@ import { paymentsService } from '@/services/api'
 import { Plus, CheckCircle, XCircle, Clock, DollarSign } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-
-interface Payment {
-  id: string
-  amount: number
-  status: 'pending' | 'completed' | 'failed' | 'cancelled'
-  method: 'mobile_money' | 'cash' | 'card'
-  transactionId: string | null
-  phoneNumber: string | null
-  wifiAccount: any | null
-  createdAt: string
-}
+import type { Payment } from '@/types/api'
 
 export default function Payments() {
   const [payments, setPayments] = useState<Payment[]>([])

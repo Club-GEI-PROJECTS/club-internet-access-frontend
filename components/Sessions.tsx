@@ -4,19 +4,11 @@ import { useEffect, useState } from 'react'
 import { sessionsService, mikrotikService } from '@/services/api'
 import { RefreshCw, Wifi, Activity, Download, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
-
-interface ActiveUser {
-  id: string
-  user: string
-  address: string
-  uptime: string
-  'bytes-in': number
-  'bytes-out': number
-}
+import type { MikroTikActiveUser, SessionStatistics } from '@/types/api'
 
 export default function Sessions() {
-  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
-  const [statistics, setStatistics] = useState<any>(null)
+  const [activeUsers, setActiveUsers] = useState<MikroTikActiveUser[]>([])
+  const [statistics, setStatistics] = useState<SessionStatistics | null>(null)
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
 
@@ -116,7 +108,7 @@ export default function Sessions() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Sessions totales</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.totalSessions}</p>
+                <p className="text-2xl font-bold text-gray-900">{statistics.total}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Activity className="h-6 w-6 text-blue-600" />
@@ -128,7 +120,7 @@ export default function Sessions() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Sessions actives</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.activeSessions}</p>
+                <p className="text-2xl font-bold text-gray-900">{statistics.active}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
                 <Wifi className="h-6 w-6 text-green-600" />
@@ -141,7 +133,7 @@ export default function Sessions() {
               <div>
                 <p className="text-sm text-gray-600">Trafic total</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatBytes(statistics.totalBytesTransferred)}
+                  {formatBytes(statistics.totalBytesUp + statistics.totalBytesDown)}
                 </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
@@ -181,7 +173,7 @@ export default function Sessions() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {activeUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user['.id']} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="font-mono text-sm font-medium">{user.user}</span>
                   </td>
@@ -205,7 +197,7 @@ export default function Sessions() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => handleDisconnect(user.id)}
+                      onClick={() => handleDisconnect(user['.id'])}
                       className="text-red-600 hover:text-red-900"
                     >
                       Déconnecter

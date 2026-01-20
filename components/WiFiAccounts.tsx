@@ -5,18 +5,7 @@ import { wifiAccountsService } from '@/services/api'
 import { Plus, Trash2, Copy, CheckCircle, XCircle, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-
-interface WiFiAccount {
-  id: string
-  username: string
-  password: string
-  duration: string
-  bandwidthProfile: string
-  expiresAt: string | null
-  isActive: boolean
-  isExpired: boolean
-  createdAt: string
-}
+import type { WiFiAccount } from '@/types/api'
 
 export default function WiFiAccounts() {
   const [accounts, setAccounts] = useState<WiFiAccount[]>([])

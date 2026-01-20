@@ -5,29 +5,7 @@ import { bandwidthService } from '@/services/api'
 import { Activity, Download, Upload, Users, RefreshCw } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
-
-interface BandwidthUsage {
-  username: string
-  ipAddress: string
-  bytesIn: number
-  bytesOut: number
-  totalBytes: number
-  bytesInFormatted: string
-  bytesOutFormatted: string
-  totalBytesFormatted: string
-  uptime: string
-  downloadSpeed?: number
-  uploadSpeed?: number
-}
-
-interface BandwidthStats {
-  totalBytesIn: number
-  totalBytesOut: number
-  totalBytes: number
-  activeUsers: number
-  averageBytesPerUser: number
-  topUsers: BandwidthUsage[]
-}
+import type { BandwidthUsage, BandwidthStats } from '@/types/api'
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B'
@@ -138,7 +116,7 @@ export default function Bandwidth() {
               <div>
                 <p className="text-sm text-gray-600">Total Téléchargé</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {formatBytes(stats.totalBytesIn)}
+                  {formatBytes(stats.totalBytesUp)}
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
@@ -152,7 +130,7 @@ export default function Bandwidth() {
               <div>
                 <p className="text-sm text-gray-600">Total Uploadé</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {formatBytes(stats.totalBytesOut)}
+                  {formatBytes(stats.totalBytesDown)}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -178,12 +156,12 @@ export default function Bandwidth() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Utilisateurs Actifs</p>
+                <p className="text-sm text-gray-600">Moyenne par Session</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {stats.activeUsers}
+                  {formatBytes(stats.averageBytesPerSession)}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Moyenne: {formatBytes(stats.averageBytesPerUser)}
+                  Pic: {formatSpeed(stats.peakBytesPerSecond)}
                 </p>
               </div>
               <div className="p-3 bg-orange-100 rounded-full">

@@ -11,31 +11,10 @@ import {
 } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
-
-interface Stats {
-  accounts: {
-    total: number
-    active: number
-    expired: number
-  }
-  payments: {
-    total: number
-    completed: number
-    revenue: number
-  }
-  sessions: {
-    total: number
-    active: number
-    mikrotikActive: number
-    totalBytesTransferred: number
-  }
-  users: {
-    total: number
-  }
-}
+import type { DashboardStats } from '@/types/api'
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<Stats | null>(null)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [charts, setCharts] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 

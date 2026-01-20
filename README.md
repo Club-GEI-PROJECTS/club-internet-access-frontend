@@ -127,10 +127,48 @@ Le backend est dans un repository séparé: `club-internet-access-backend`
 - React 18
 - TypeScript
 - TailwindCSS
-- Axios
+- Axios (compatible)
+- Fetch API (Client API réutilisable)
 - Recharts (Graphiques)
 - React Hot Toast (Notifications)
 - Lucide React (Icônes)
+
+## 🔌 Client API
+
+Le projet offre **deux options** pour les appels API :
+
+1. **Client API réutilisable** (`lib/api-client.ts`) - **Recommandé**
+   ```typescript
+   import { apiClient } from '@/lib/api-client'
+   const accounts = await apiClient.wifiAccounts.list()
+   ```
+
+2. **Services Axios** (`services/api.ts`) - Compatible existant
+   ```typescript
+   import { wifiAccountsService } from '@/services/api'
+   const accounts = await wifiAccountsService.getAll()
+   ```
+
+## 📚 Documentation
+
+### Déploiement réseau
+
+Pour le déploiement sur site avec Starlink + MikroTik + AP Cisco :
+
+- **[Déploiement Complet](./docs/DEPLOIEMENT_COMPLET.md)** : Procédure complète de A à Z
+- **[Checklist Installation](./docs/CHECKLIST_INSTALLATION.md)** : Checklist jour J
+- **[Schéma Réseau](./docs/SCHEMA_RESEAU.md)** : Architecture technique détaillée
+- **[Plan d'Évolution](./docs/PLAN_EVOLUTION.md)** : Migration RB951 → RB4011
+- **[Scripts MikroTik](./docs/scripts/)** : Configurations prêtes à importer
+
+### Intégration Backend
+
+Pour intégrer avec le backend API :
+
+- **[Intégration Backend](./docs/INTEGRATION_BACKEND.md)** : Guide complet d'intégration
+- **Types TypeScript** : `types/api.ts`
+- **Service API** : `services/api.ts` et `lib/api.ts`
+- **Hooks personnalisés** : `hooks/useApi.ts`
 
 ## 📝 License
 

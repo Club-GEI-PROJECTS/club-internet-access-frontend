@@ -2,14 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService } from '@/services/api'
-
-interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  role: 'admin' | 'agent' | 'student'
-}
+import { getToken, setToken as setAuthToken, removeToken } from '@/lib/auth'
+import type { User, LoginResponse } from '@/types/api'
 
 interface AuthContextType {
   user: User | null
@@ -27,15 +21,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('token')
-      setToken(storedToken)
-      if (storedToken) {
-        authService.setToken(storedToken)
-        fetchProfile()
-      } else {
-        setLoading(false)
-      }
+    const storedToken = getToken()
+    setToken(storedToken)
+    if (storedToken) {
+      authService.setToken(storedToken)
+      fetchProfile()
+    } else {
+      setLoading(false)
     }
   }, [])
 
@@ -44,9 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profile = await authService.getProfile()
       setUser(profile)
     } catch (error) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token')
-      }
+      removeToken()
       setToken(null)
     } finally {
       setLoading(false)
@@ -54,21 +44,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = async (email: string, password: string) => {
-    const response = await authService.login(email, password)
+    const response: LoginResponse = await authService.login(email, password)
     setToken(response.access_token)
     setUser(response.user)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('token', response.access_token)
-    }
+    setAuthToken(response.access_token) // Utilise lib/auth pour stocker
     authService.setToken(response.access_token)
   }
 
   const logout = () => {
     setToken(null)
     setUser(null)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token')
-    }
+    removeToken()
     authService.setToken(null)
     if (typeof window !== 'undefined') {
       window.location.href = '/login'

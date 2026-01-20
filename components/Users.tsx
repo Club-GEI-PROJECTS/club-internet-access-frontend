@@ -5,16 +5,7 @@ import { usersService } from '@/services/api'
 import { Plus, Shield, User as UserIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-
-interface User {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  role: 'admin' | 'agent' | 'student'
-  isActive: boolean
-  createdAt: string
-}
+import type { User } from '@/types/api'
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([])
