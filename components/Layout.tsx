@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { UserRole } from '@/types/api'
 import { 
   LayoutDashboard, 
   Wifi, 
@@ -22,14 +23,45 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Comptes Wi-Fi', href: '/wifi-accounts', icon: Wifi },
-    { name: 'Paiements', href: '/payments', icon: CreditCard },
-    { name: 'Sessions', href: '/sessions', icon: Activity },
-    { name: 'Bande Passante', href: '/bandwidth', icon: TrendingUp },
-    ...(user?.role === 'admin' ? [{ name: 'Utilisateurs', href: '/users', icon: Users }] : []),
-  ]
+  // Navigation selon le rôle
+  const getNavigation = () => {
+    const baseNav = [
+      { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    ]
+
+    if (!user) return baseNav
+
+    switch (user.role) {
+      case UserRole.ADMIN:
+        return [
+          ...baseNav,
+          { name: 'Comptes Wi-Fi', href: '/wifi-accounts', icon: Wifi },
+          { name: 'Paiements', href: '/payments', icon: CreditCard },
+          { name: 'Sessions', href: '/sessions', icon: Activity },
+          { name: 'Bande Passante', href: '/bandwidth', icon: TrendingUp },
+          { name: 'Utilisateurs', href: '/users', icon: Users },
+        ]
+      
+      case UserRole.AGENT:
+        return [
+          ...baseNav,
+          { name: 'Comptes Wi-Fi', href: '/wifi-accounts', icon: Wifi },
+          { name: 'Paiements', href: '/payments', icon: CreditCard },
+        ]
+      
+      case UserRole.STUDENT:
+        return [
+          ...baseNav,
+          { name: 'Mes Connexions', href: '/wifi-accounts', icon: Wifi },
+          { name: 'Mes Paiements', href: '/payments', icon: CreditCard },
+        ]
+      
+      default:
+        return baseNav
+    }
+  }
+
+  const navigation = getNavigation()
 
   const handleLogout = () => {
     logout()

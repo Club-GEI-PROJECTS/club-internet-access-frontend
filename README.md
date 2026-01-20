@@ -166,6 +166,7 @@ Pour le déploiement sur site avec Starlink + MikroTik + AP Cisco :
 Pour intégrer avec le backend API :
 
 - **[Intégration Backend](./docs/INTEGRATION_BACKEND.md)** : Guide complet d'intégration
+- **[Vérification Backend](./docs/VERIFICATION_BACKEND.md)** : ⚠️ **IMPORTANT** - Checklist des vérifications backend après implémentation des dashboards par rôle
 - **Types TypeScript** : `types/api.ts`
 - **Service API** : `services/api.ts` et `lib/api.ts`
 - **Hooks personnalisés** : `hooks/useApi.ts`
