@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
@@ -11,6 +11,10 @@ import type { RegisterRequest } from '@/types/api'
 import { UserRole } from '@/types/api'
 
 export default function Login() {
+  // IMPORTANT: Ne pas forcer HTTPS sur cette page
+  // Le portail captif MikroTik redirige en HTTP avant authentification
+  // On accepte HTTP ici, puis on redirige vers HTTPS après login
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,8 +28,17 @@ export default function Login() {
     phone: '',
     role: UserRole.STUDENT,
   })
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const router = useRouter()
+
+  // Vérifier si l'utilisateur est déjà authentifié
+  // Si oui, rediriger vers HTTPS
+  useEffect(() => {
+    if (user && typeof window !== 'undefined' && window.location.protocol === 'http:') {
+      const httpsUrl = window.location.href.replace('http://', 'https://').replace('/login', '/')
+      window.location.href = httpsUrl
+    }
+  }, [user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +47,15 @@ export default function Login() {
     try {
       await login(email, password)
       toast.success('Connexion réussie!')
-      router.push('/')
+      
+      // Redirection HTTPS après authentification
+      // Si on est en HTTP (portail captif), on redirige vers HTTPS
+      if (typeof window !== 'undefined' && window.location.protocol === 'http:') {
+        const httpsUrl = window.location.href.replace('http://', 'https://')
+        window.location.href = httpsUrl.replace('/login', '/')
+      } else {
+        router.push('/')
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erreur de connexion')
     } finally {
