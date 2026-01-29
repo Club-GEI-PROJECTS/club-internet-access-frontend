@@ -32,6 +32,11 @@ import type {
   UserBandwidth,
   BandwidthHistory,
   ApiError,
+  Ticket,
+  TicketStatus,
+  TicketType,
+  TicketPurchaseRequest,
+  TicketPurchaseResponse,
 } from '@/types/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
@@ -356,6 +361,96 @@ export const apiClient = {
 
     getHistory: async (days: number = 7): Promise<BandwidthHistory[]> => {
       return apiRequest<BandwidthHistory[]>(`/bandwidth/history?days=${days}`)
+    },
+  },
+
+  // ============================================
+  // TICKETS (pré-générés depuis Mikhmon)
+  // ============================================
+  tickets: {
+    list: async (status?: TicketStatus): Promise<Ticket[]> => {
+      const query = status ? `?status=${status}` : ''
+      return apiRequest<Ticket[]>(`/tickets${query}`)
+    },
+
+    getAvailable: async (): Promise<Ticket[]> => {
+      return apiRequest<Ticket[]>('/tickets/available')
+    },
+
+    getTypes: async (): Promise<TicketType[]> => {
+      return apiRequest<TicketType[]>('/tickets/types')
+    },
+
+    getByType: async (typeId: string): Promise<Ticket[]> => {
+      return apiRequest<Ticket[]>(`/tickets/type/${typeId}`)
+    },
+
+    getById: async (id: string): Promise<Ticket> => {
+      return apiRequest<Ticket>(`/tickets/${id}`)
+    },
+
+    purchase: async (data: TicketPurchaseRequest): Promise<TicketPurchaseResponse> => {
+      return apiRequest<TicketPurchaseResponse>('/tickets/purchase', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    },
+
+    reserve: async (id: string): Promise<Ticket> => {
+      return apiRequest<Ticket>(`/tickets/${id}/reserve`, {
+        method: 'POST',
+      })
+    },
+
+    release: async (id: string): Promise<Ticket> => {
+      return apiRequest<Ticket>(`/tickets/${id}/release`, {
+        method: 'POST',
+      })
+    },
+  },
+
+  // ============================================
+  // ADMIN - TICKETS
+  // ============================================
+  admin: {
+    tickets: {
+      import: async (file: File): Promise<{ imported: number; failed: number; errors: string[] }> => {
+        const token = getToken()
+        const formData = new FormData()
+        formData.append('file', file)
+        
+        const response = await fetch(`${API_URL}/admin/tickets/import`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            // Ne pas mettre Content-Type, le navigateur le fera automatiquement avec le boundary
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        })
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({
+            message: `Erreur ${response.status}`,
+          }))
+          throw new Error(error.message || `Erreur ${response.status}`)
+        }
+
+        return response.json()
+      },
+
+      list: async (): Promise<Ticket[]> => {
+        return apiRequest<Ticket[]>('/admin/tickets')
+      },
+
+      getStats: async (): Promise<{
+        total: number
+        available: number
+        sold: number
+        reserved: number
+        revenue: number
+      }> => {
+        return apiRequest('/admin/tickets/stats')
+      },
     },
   },
 

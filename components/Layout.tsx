@@ -13,7 +13,8 @@ import {
   TrendingUp,
   LogOut,
   Menu,
-  X
+  X,
+  Ticket
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -26,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Navigation selon le rôle
   const getNavigation = () => {
     const baseNav = [
-      { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     ]
 
     if (!user) return baseNav
@@ -35,6 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       case UserRole.ADMIN:
         return [
           ...baseNav,
+          { name: 'Tickets', href: '/admin/tickets', icon: Ticket },
           { name: 'Comptes Wi-Fi', href: '/wifi-accounts', icon: Wifi },
           { name: 'Paiements', href: '/payments', icon: CreditCard },
           { name: 'Sessions', href: '/sessions', icon: Activity },

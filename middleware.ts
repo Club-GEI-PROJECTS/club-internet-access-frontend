@@ -17,8 +17,7 @@ export function middleware(request: NextRequest) {
                    url.protocol === 'https:'
   
   // Routes publiques (pas besoin d'authentification)
-  // Ces routes acceptent HTTP pour le portail captif MikroTik
-  const publicRoutes = ['/login', '/forgot-password', '/reset-password', '/captive']
+  const publicRoutes = ['/login', '/forgot-password', '/reset-password', '/buy-ticket', '/home']
   const isPublicRoute = publicRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
   )

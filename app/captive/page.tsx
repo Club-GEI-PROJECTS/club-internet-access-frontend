@@ -13,8 +13,8 @@ import { Wifi, ArrowRight } from 'lucide-react'
 export default function CaptivePage() {
   const handleContinue = () => {
     if (typeof window !== 'undefined') {
-      // Rediriger vers HTTPS pour le login
-      const httpsUrl = window.location.href.replace('http://', 'https://').replace('/captive', '/login')
+      // Rediriger vers HTTPS pour l'achat de tickets
+      const httpsUrl = window.location.href.replace('http://', 'https://').replace('/captive', '/buy-ticket')
       window.location.href = httpsUrl
     }
   }

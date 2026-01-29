@@ -268,6 +268,65 @@ export interface CreateMikroTikUserRequest {
 }
 
 // ============================================
+// TICKETS (pré-générés depuis Mikhmon)
+// ============================================
+
+export enum TicketStatus {
+  AVAILABLE = 'available',
+  RESERVED = 'reserved',
+  SOLD = 'sold',
+  EXPIRED = 'expired',
+}
+
+export interface TicketType {
+  id: string
+  name: string
+  profile: string // Profil MikroTik (ex: TEST, BASIC, PREMIUM)
+  description: string
+  timeLimit?: string // Format: "1d", "24h", null si illimité
+  dataLimit?: string // Format: "1GB", "500MB", null si illimité
+  price: number // Prix en CDF
+  isActive: boolean
+  availableCount: number // Nombre de tickets disponibles de ce type
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface Ticket {
+  id: string
+  username: string
+  password: string
+  profile: string
+  timeLimit?: string // Format: "1d" ou "24h" ou vide si illimité
+  dataLimit?: string // Format: "1GB" ou vide si illimité
+  comment?: string // Timestamp de création depuis Mikhmon
+  status: TicketStatus
+  price: number // Prix de vente en CDF
+  soldAt?: string
+  soldTo?: string // Email ou téléphone de l'acheteur
+  paymentId?: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface TicketPurchaseRequest {
+  ticketId: string
+  phoneNumber: string
+  method: PaymentMethod
+}
+
+export interface TicketPurchaseResponse {
+  ticket: Ticket
+  payment: Payment
+  credentials: {
+    username: string
+    password: string
+    profile: string
+    instructions: string
+  }
+}
+
+// ============================================
 // BANDWIDTH
 // ============================================
 
