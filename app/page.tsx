@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { logger } from '@/lib/logger'
 
 /**
  * Page d'accueil - Redirige vers /home (publique) ou /dashboard (si connecté)
@@ -12,11 +13,12 @@ export default function Home() {
   const { user } = useAuth()
 
   useEffect(() => {
+    logger.log('Page /: redirection selon état auth', { hasUser: !!user })
     if (user) {
-      // Si l'utilisateur est connecté, rediriger vers le dashboard
+      logger.info('Page /: utilisateur connecté → /dashboard')
       router.push('/dashboard')
     } else {
-      // Sinon, rediriger vers la page publique d'accueil
+      logger.info('Page /: non connecté → /home')
       router.push('/home')
     }
   }, [user, router])

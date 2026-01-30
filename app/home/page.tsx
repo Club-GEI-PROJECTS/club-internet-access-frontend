@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Wifi, Clock, HardDrive, ArrowRight, ShoppingCart } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { logger } from '@/lib/logger'
 import type { TicketType } from '@/types/api'
 import toast from 'react-hot-toast'
 
@@ -23,14 +24,15 @@ export default function HomePage() {
   }, [])
 
   const loadTicketTypes = async () => {
+    logger.log('Home: chargement des types de tickets')
     try {
       const data = await apiClient.tickets.getTypes()
-      // Filtrer uniquement les types actifs avec des tickets disponibles
       const availableTypes = data.filter(type => type.isActive && type.availableCount > 0)
       setTicketTypes(availableTypes)
+      logger.info('Home: types chargés', { total: data.length, disponibles: availableTypes.length })
     } catch (error: any) {
+      logger.error('Home: erreur chargement types', error)
       toast.error('Erreur lors du chargement des types de tickets')
-      console.error(error)
     } finally {
       setLoading(false)
     }
@@ -50,6 +52,7 @@ export default function HomePage() {
   }
 
   const handleBuyTicket = (typeId: string) => {
+    logger.log('Home: achat ticket, type sélectionné', { typeId })
     router.push(`/buy-ticket?type=${typeId}`)
   }
 

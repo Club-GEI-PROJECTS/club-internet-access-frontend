@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Upload, FileText, CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { logger } from '@/lib/logger'
 import toast from 'react-hot-toast'
 
 /**
@@ -19,32 +20,31 @@ export default function TicketManagement() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const processFile = async (file: File) => {
+    logger.log('TicketManagement: fichier reçu', { name: file.name, size: file.size })
     if (!file.name.endsWith('.csv')) {
+      logger.warn('TicketManagement: fichier non CSV', { name: file.name })
       toast.error('Veuillez sélectionner un fichier CSV')
       return
     }
-
     setUploading(true)
     setImportResult(null)
-
+    logger.info('TicketManagement: import CSV en cours', { name: file.name })
     try {
       const result = await apiClient.admin.tickets.import(file)
       setImportResult(result)
-      
+      logger.info('TicketManagement: import terminé', result)
       if (result.imported > 0) {
         toast.success(`${result.imported} ticket(s) importé(s) avec succès!`)
       }
-      
       if (result.failed > 0) {
         toast.error(`${result.failed} ticket(s) n'ont pas pu être importé(s)`)
       }
-
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
     } catch (error: any) {
+      logger.error('TicketManagement: erreur import', error)
       toast.error(error.message || 'Erreur lors de l\'importation du fichier')
-      console.error(error)
     } finally {
       setUploading(false)
     }
@@ -52,7 +52,10 @@ export default function TicketManagement() {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) processFile(file)
+    if (file) {
+      logger.log('TicketManagement: sélection fichier', { name: file.name })
+      processFile(file)
+    }
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -63,17 +66,18 @@ export default function TicketManagement() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-
     const file = e.dataTransfer.files[0]
     if (file && file.name.endsWith('.csv')) {
+      logger.log('TicketManagement: drop fichier CSV', { name: file.name })
       processFile(file)
     } else {
+      logger.warn('TicketManagement: drop fichier non CSV')
       toast.error('Veuillez déposer un fichier CSV')
     }
   }
 
   const downloadTemplate = () => {
-    // Créer un template CSV
+    logger.log('TicketManagement: téléchargement template CSV')
     const csvContent = `Username,Password,Profile,Time Limit,Data Limit,Comment
 dzpv,3552,TEST,,,2026-01-27 22:52:37
 user2,pass2,BASIC,24h,1GB,2026-01-27 22:52:37

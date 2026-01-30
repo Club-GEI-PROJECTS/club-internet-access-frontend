@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService } from '@/services/api'
 import { getToken, setToken as setAuthToken, removeToken } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 import type { User, LoginResponse } from '@/types/api'
 
 interface AuthContextType {
@@ -21,21 +22,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    logger.log('AuthContext: initialisation, vérification du token')
     const storedToken = getToken()
     setToken(storedToken)
     if (storedToken) {
+      logger.info('AuthContext: token trouvé, chargement du profil')
       authService.setToken(storedToken)
       fetchProfile()
     } else {
+      logger.log('AuthContext: aucun token, utilisateur non connecté')
       setLoading(false)
     }
   }, [])
 
   const fetchProfile = async () => {
     try {
+      logger.log('AuthContext: fetchProfile en cours')
       const profile = await authService.getProfile()
       setUser(profile)
+      logger.info('AuthContext: profil chargé', { email: profile.email, role: profile.role })
     } catch (error) {
+      logger.warn('AuthContext: fetchProfile échoué, suppression du token', error)
       removeToken()
       setToken(null)
     } finally {
@@ -44,19 +51,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = async (email: string, password: string) => {
-    const response: LoginResponse = await authService.login(email, password)
-    setToken(response.access_token)
-    setUser(response.user)
-    setAuthToken(response.access_token) // Utilise lib/auth pour stocker
-    authService.setToken(response.access_token)
+    logger.log('AuthContext: tentative de connexion', { email })
+    try {
+      const response: LoginResponse = await authService.login(email, password)
+      setToken(response.access_token)
+      setUser(response.user)
+      setAuthToken(response.access_token) // Utilise lib/auth pour stocker
+      authService.setToken(response.access_token)
+      logger.info('AuthContext: connexion réussie', { email: response.user.email, role: response.user.role })
+    } catch (error) {
+      logger.error('AuthContext: connexion échouée', { email }, error)
+      throw error
+    }
   }
 
   const logout = () => {
+    logger.log('AuthContext: déconnexion')
     setToken(null)
     setUser(null)
     removeToken()
     authService.setToken(null)
     if (typeof window !== 'undefined') {
+      logger.info('AuthContext: redirection vers /login')
       window.location.href = '/login'
     }
   }

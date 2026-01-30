@@ -1,48 +1,34 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const LOG_PREFIX = '[ClubIA] Middleware'
+
 /**
  * Middleware Next.js pour protéger les routes et gérer HTTP/HTTPS
- * 
- * STRATÉGIE HTTP/HTTPS pour portail captif MikroTik :
- * - Routes publiques (/login, /forgot-password, /reset-password) : HTTP accepté
- * - Routes protégées : HTTPS forcé (après authentification)
- * 
- * Cela permet au portail captif de rediriger vers HTTP avant login,
- * puis on force HTTPS après authentification pour la sécurité.
  */
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
   const url = request.nextUrl.clone()
   const isHttps = request.headers.get('x-forwarded-proto') === 'https' || 
                    url.protocol === 'https:'
-  
-  // Routes publiques (pas besoin d'authentification)
-  const publicRoutes = ['/login', '/forgot-password', '/reset-password', '/buy-ticket', '/home']
-  const isPublicRoute = publicRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
 
-  // Si c'est une route publique, laisser passer (HTTP ou HTTPS)
+  console.log(`${LOG_PREFIX} requête`, { pathname, isHttps })
+
+  const publicRoutes = ['/login', '/forgot-password', '/reset-password', '/buy-ticket', '/home']
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+
   if (isPublicRoute) {
+    console.log(`${LOG_PREFIX} route publique, passage`, { pathname })
     return NextResponse.next()
   }
 
-  // Routes protégées : FORCER HTTPS
-  // Après authentification, on doit être en HTTPS pour la sécurité
   if (!isHttps && process.env.NODE_ENV === 'production') {
+    console.log(`${LOG_PREFIX} production HTTP → redirection HTTPS`, { pathname })
     url.protocol = 'https:'
     return NextResponse.redirect(url)
   }
 
-  // Routes protégées (nécessitent authentification)
-  // Note: Pour localStorage, la vérification se fait côté client via PrivateRoute
-  // Ce middleware est utile si on utilise des cookies avec httpOnly
-  // Dans ce cas, on pourrait vérifier :
-  // const token = request.cookies.get('token')?.value
-  // if (!token && !isPublicRoute) {
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
-
+  console.log(`${LOG_PREFIX} route protégée, passage`, { pathname })
   return NextResponse.next()
 }
 

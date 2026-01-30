@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { logger } from '@/lib/logger'
 import { UserRole } from '@/types/api'
 import { 
   LayoutDashboard, 
@@ -64,8 +65,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   const navigation = getNavigation()
+  logger.debug('Layout: navigation', { pathname, role: user?.role, items: navigation.length })
 
   const handleLogout = () => {
+    logger.log('Layout: déconnexion demandée')
     logout()
     router.push('/login')
   }

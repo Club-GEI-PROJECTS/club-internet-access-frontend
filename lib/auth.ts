@@ -1,5 +1,7 @@
 // Gestion de l'authentification et du token
 
+import { logger } from './logger'
+
 /**
  * Gestion de l'authentification avec localStorage
  * Pour utiliser cookies, décommentez la section en bas de fichier
@@ -12,6 +14,7 @@
 export const setToken = (token: string) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('token', token)
+    logger.info('Auth: token stocké')
   }
 }
 
@@ -20,7 +23,9 @@ export const setToken = (token: string) => {
  */
 export const getToken = (): string | null => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('token')
+    const token = localStorage.getItem('token')
+    logger.debug('Auth: getToken', token ? 'token présent' : 'aucun token')
+    return token
   }
   return null
 }
@@ -31,6 +36,7 @@ export const getToken = (): string | null => {
 export const removeToken = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token')
+    logger.info('Auth: token supprimé')
   }
 }
 
@@ -38,7 +44,9 @@ export const removeToken = () => {
  * Vérifie si l'utilisateur est authentifié
  */
 export const isAuthenticated = (): boolean => {
-  return getToken() !== null
+  const ok = getToken() !== null
+  logger.debug('Auth: isAuthenticated', ok)
+  return ok
 }
 
 /* 

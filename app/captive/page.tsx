@@ -1,19 +1,15 @@
 'use client'
 
 import { Wifi, ArrowRight } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 /**
  * Page "tampon" pour le portail captif MikroTik
- * 
- * Cette page accepte HTTP (nécessaire pour le portail captif)
- * et redirige vers HTTPS après que l'utilisateur clique sur "Continuer"
- * 
- * Utilisée par les hôtels et aéroports pour une meilleure UX
  */
 export default function CaptivePage() {
   const handleContinue = () => {
     if (typeof window !== 'undefined') {
-      // Rediriger vers HTTPS pour l'achat de tickets
+      logger.log('Captive: clic Continuer, redirection vers /buy-ticket (HTTPS)')
       const httpsUrl = window.location.href.replace('http://', 'https://').replace('/captive', '/buy-ticket')
       window.location.href = httpsUrl
     }

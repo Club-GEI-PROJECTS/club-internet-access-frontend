@@ -1,7 +1,7 @@
 // Service API utilisant axios (compatible avec le code existant)
-// Pour une approche plus moderne, utiliser lib/api.ts avec fetch
 import axios from 'axios'
 import { getToken, removeToken } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
 
@@ -15,6 +15,7 @@ const api = axios.create({
 // Intercepteur pour ajouter le token
 api.interceptors.request.use((config) => {
   const token = getToken()
+  logger.debug('API (axios): requête', { method: config.method, url: config.url, hasToken: !!token })
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -23,20 +24,26 @@ api.interceptors.request.use((config) => {
 
 // Intercepteur pour gérer les erreurs avec messages améliorés
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    logger.debug('API (axios): réponse', { url: response.config.url, status: response.status })
+    return response
+  },
   (error) => {
+    logger.error('API (axios): erreur', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+    })
     if (error.response?.status === 401) {
+      logger.warn('API (axios): 401, déconnexion et redirection /login')
       removeToken()
       if (typeof window !== 'undefined') {
         window.location.href = '/login'
       }
     }
-    
-    // Message d'erreur amélioré
     if (error.response?.data?.message) {
       error.message = error.response.data.message
     }
-    
     return Promise.reject(error)
   }
 )

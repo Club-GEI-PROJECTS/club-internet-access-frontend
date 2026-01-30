@@ -41,6 +41,8 @@ import type {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
 
+import { logger } from './logger'
+
 /**
  * Fonction utilitaire pour gérer les tokens
  */
@@ -85,9 +87,14 @@ async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getToken()
+  const method = (options.method || 'GET').toUpperCase()
+  const url = `${API_URL}${endpoint}`
+  logger.log('API: requête', { method, endpoint, url })
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const token = getToken()
+  if (token) logger.debug('API: token présent pour la requête')
+
+  const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -96,8 +103,11 @@ async function apiRequest<T>(
     },
   })
 
+  logger.log('API: réponse', { endpoint, status: response.status, ok: response.ok })
+
   // Gestion des erreurs HTTP
   if (response.status === 401) {
+    logger.warn('API: 401 Unauthorized, déconnexion et redirection /login')
     removeToken()
     if (typeof window !== 'undefined') {
       window.location.href = '/login'
@@ -106,10 +116,12 @@ async function apiRequest<T>(
   }
 
   if (response.status === 403) {
+    logger.warn('API: 403 Forbidden', { endpoint })
     throw new Error('Accès refusé. Permissions insuffisantes.')
   }
 
   if (response.status === 404) {
+    logger.warn('API: 404 Not Found', { endpoint })
     throw new Error('Ressource non trouvée.')
   }
 
@@ -119,6 +131,7 @@ async function apiRequest<T>(
       message: `Erreur ${response.status}`,
       error: 'Unknown error',
     }))
+    logger.error('API: erreur', { endpoint, status: response.status }, error)
     throw new Error(
       Array.isArray(error.message) 
         ? error.message.join(', ') 
@@ -126,7 +139,9 @@ async function apiRequest<T>(
     )
   }
 
-  return response.json()
+  const data = await response.json()
+  logger.debug('API: succès', { endpoint })
+  return data as T
 }
 
 /**

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Wifi, ShoppingCart, CheckCircle, Copy, Clock, HardDrive, CreditCard } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { logger } from '@/lib/logger'
 import type { Ticket, TicketType, TicketPurchaseRequest, TicketPurchaseResponse } from '@/types/api'
 import { PaymentMethod } from '@/types/api'
 import toast from 'react-hot-toast'
@@ -25,10 +26,9 @@ export default function BuyTicketPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Récupérer le type de ticket depuis l'URL
     const params = new URLSearchParams(window.location.search)
     const typeId = params.get('type')
-    
+    logger.log('BuyTicket: chargement', { typeId: typeId ?? 'tous' })
     if (typeId) {
       loadTicketType(typeId)
     } else {
@@ -37,34 +37,39 @@ export default function BuyTicketPage() {
   }, [])
 
   const loadTicketType = async (typeId: string) => {
+    logger.log('BuyTicket: chargement type', { typeId })
     try {
       const [typeData, ticketsData] = await Promise.all([
         apiClient.tickets.getTypes().then(types => types.find(t => t.id === typeId)),
         apiClient.tickets.getByType(typeId)
       ])
-      
       if (typeData) {
         setTicketType(typeData)
-        setTickets(ticketsData.filter(t => t.status === 'available'))
+        const available = ticketsData.filter(t => t.status === 'available')
+        setTickets(available)
+        logger.info('BuyTicket: type et tickets chargés', { typeId, count: available.length })
       } else {
+        logger.warn('BuyTicket: type non trouvé', { typeId })
         toast.error('Type de ticket non trouvé')
         router.push('/home')
       }
     } catch (error: any) {
+      logger.error('BuyTicket: erreur chargement type', { typeId }, error)
       toast.error('Erreur lors du chargement du type de ticket')
-      console.error(error)
     } finally {
       setLoading(false)
     }
   }
 
   const loadAvailableTickets = async () => {
+    logger.log('BuyTicket: chargement tickets disponibles')
     try {
       const data = await apiClient.tickets.getAvailable()
       setTickets(data)
+      logger.info('BuyTicket: tickets chargés', { count: data.length })
     } catch (error: any) {
+      logger.error('BuyTicket: erreur chargement tickets', error)
       toast.error('Erreur lors du chargement des tickets')
-      console.error(error)
     } finally {
       setLoading(false)
     }
@@ -72,35 +77,33 @@ export default function BuyTicketPage() {
 
   const handlePurchase = async () => {
     if (!selectedTicket || !phoneNumber.trim()) {
+      logger.warn('BuyTicket: achat refusé, ticket ou téléphone manquant')
       toast.error('Veuillez sélectionner un ticket et entrer votre numéro de téléphone')
       return
     }
-
-    // Validation du numéro de téléphone (format congolais)
     const phoneRegex = /^(\+243|0)[0-9]{9}$/
     if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+      logger.warn('BuyTicket: numéro de téléphone invalide')
       toast.error('Veuillez entrer un numéro de téléphone valide (ex: +243900000000 ou 0900000000)')
       return
     }
-
+    logger.log('BuyTicket: achat en cours', { ticketId: selectedTicket.id, phone: phoneNumber })
     setPurchasing(true)
-
     try {
       const purchaseData: TicketPurchaseRequest = {
         ticketId: selectedTicket.id,
         phoneNumber: phoneNumber.replace(/\s/g, ''),
         method: PaymentMethod.MOBILE_MONEY,
       }
-
       const result = await apiClient.tickets.purchase(purchaseData)
       setPurchaseResult(result)
       toast.success('Ticket acheté avec succès!')
-      
-      // Recharger les tickets disponibles
+      logger.info('BuyTicket: achat réussi', { ticketId: selectedTicket.id })
       await loadAvailableTickets()
       setSelectedTicket(null)
       setPhoneNumber('')
     } catch (error: any) {
+      logger.error('BuyTicket: achat échoué', error)
       toast.error(error.message || 'Erreur lors de l\'achat du ticket')
     } finally {
       setPurchasing(false)
@@ -109,6 +112,7 @@ export default function BuyTicketPage() {
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
+    logger.log('BuyTicket: copié dans presse-papier', { label })
     toast.success(`${label} copié dans le presse-papier!`)
   }
 
