@@ -18,11 +18,7 @@ export default function TicketManagement() {
   } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    // Vérifier que c'est un fichier CSV
+  const processFile = async (file: File) => {
     if (!file.name.endsWith('.csv')) {
       toast.error('Veuillez sélectionner un fichier CSV')
       return
@@ -43,7 +39,6 @@ export default function TicketManagement() {
         toast.error(`${result.failed} ticket(s) n'ont pas pu être importé(s)`)
       }
 
-      // Réinitialiser l'input
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -53,6 +48,11 @@ export default function TicketManagement() {
     } finally {
       setUploading(false)
     }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) processFile(file)
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -66,11 +66,7 @@ export default function TicketManagement() {
 
     const file = e.dataTransfer.files[0]
     if (file && file.name.endsWith('.csv')) {
-      // Créer un événement de changement pour déclencher handleFileSelect
-      const fakeEvent = {
-        target: { files: [file] },
-      } as React.ChangeEvent<HTMLInputElement>
-      handleFileSelect(fakeEvent)
+      processFile(file)
     } else {
       toast.error('Veuillez déposer un fichier CSV')
     }
